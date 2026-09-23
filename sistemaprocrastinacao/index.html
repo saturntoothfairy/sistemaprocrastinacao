@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Procrastinação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Silkscreen:wght@400;700&family=Instrument+Serif:ital@1&family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+/* Um só mundo: caderno de adesivos y2k. Rosa chiclete, lavanda, lima e tinta preta sobre papel blush. */
+:root{
+  color-scheme:light;
+  --paper:#fcefee; --card:#fff8f7; --ink:#15111a; --ink-muted:#5b5163; --ink-faint:#8e8497;
+  --pink:#ff8fd0; --pink-soft:#ffc9e8; --purple:#7b52d9; --lilac:#c9b0ff; --lime:#d6ef7e; --line:#15111a;
+  --accent-text:#b0237a; --done:#7b52d9;
+  --pixel:"Pixelify Sans", "Courier New", monospace;
+  --num:"Silkscreen", "Courier New", monospace;
+  --script:"Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --sans:"Poppins", ui-sans-serif, system-ui, sans-serif;
+  --bw:2px; --r:24px; --hard:4px 4px 0 var(--ink);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+html{overflow-x:clip}
+body{background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:15.5px; line-height:1.55; padding-inline:16px; padding-block:0; -webkit-font-smoothing:antialiased}
+::selection{background:var(--lime); color:var(--ink)}
+.wrap{position:relative; max-width:1040px; margin:0 auto; display:flex; flex-direction:column; gap:22px; min-height:100%; padding-bottom:20px}
+main{flex:1; display:flex; flex-direction:column}
+main > .enter{animation:pop .45s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{opacity:.001; transform:translateY(8px) scale(.99)}to{opacity:1; transform:none}}
+@keyframes wiggle{0%,100%{rotate:0deg}30%{rotate:-6deg}60%{rotate:5deg}}
+
+/* ---- barra-pílula no topo ---- */
+header{position:sticky; top:calc(env(safe-area-inset-top,0px) + 10px); z-index:5; margin-top:14px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; background:var(--card); border:var(--bw) solid var(--line); border-radius:999px; padding:6px 6px 6px 16px}
+.brand{display:inline-flex; align-items:center; gap:10px; border:0; background:transparent; color:var(--ink); font-family:var(--sans); font-weight:700; font-size:15px; letter-spacing:-.01em; cursor:pointer; padding:4px 2px}
+.brand .mini{width:18px; height:16px; display:block}
+.quiet-nav{display:flex; align-items:center; gap:2px; flex-wrap:wrap}
+.quiet-nav .ast{font-size:18px; line-height:1; padding-inline:4px; font-weight:700}
+.quiet-nav button{border:0; background:transparent; color:var(--ink-muted); font:inherit; font-size:14px; font-weight:600; padding:6px 12px; border-radius:999px; cursor:pointer; transition:background .15s, color .15s}
+.quiet-nav button:hover{color:var(--ink); background:var(--pink-soft)}
+.quiet-nav button[aria-current="page"]{color:var(--ink); background:var(--lime); box-shadow:inset 0 0 0 1.5px var(--line)}
+.foot{display:flex; justify-content:center}
+.status{display:inline-flex; align-items:center; gap:7px; font-size:12px; color:var(--ink-faint)}
+.status i{width:8px; height:8px; border-radius:2px; background:var(--purple)}
+.status.off i{background:var(--pink)}
+
+/* ---- tipografia: pixel + script ---- */
+h1{font-family:var(--pixel); font-weight:700; font-size:40px; line-height:1.05; letter-spacing:-.01em; margin:0; text-wrap:balance; color:var(--purple)}
+h2{font-family:var(--pixel); font-weight:700; font-size:24px; line-height:1.15; margin:0; text-wrap:balance}
+h1 em,h2 em,.home-title em,.display em{font-family:var(--script); font-style:italic; font-weight:400; color:var(--accent-text); letter-spacing:0; font-size:1.12em; line-height:.9; padding-inline:.04em}
+p{margin:0}
+.muted{color:var(--ink-muted)}
+.small{font-size:13px; line-height:18px}
+.label{font-family:var(--pixel); font-size:13px; line-height:16px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-muted)}
+.hint{font-size:13px; line-height:18px; color:var(--ink-muted)}
+.display{font-family:var(--pixel); font-weight:700; font-size:34px; line-height:1.1; text-wrap:balance; margin:0}
+.pts{font-family:var(--num); font-variant-numeric:tabular-nums; font-weight:700}
+
+/* ---- blocos ---- */
+.stack{display:flex; flex-direction:column; gap:18px}
+.stack-sm{display:flex; flex-direction:column; gap:8px}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.between{justify-content:space-between}
+.card,.stat,details,.flash,.bento{background:var(--card); border:var(--bw) solid var(--line); border-radius:var(--r)}
+.card{padding:22px; display:flex; flex-direction:column; gap:16px}
+
+/* ---- controles: adesivos com sombra dura ---- */
+.btn{font:inherit; font-size:15px; font-weight:600; border-radius:999px; padding:10px 20px; cursor:pointer; border:var(--bw) solid transparent; background:transparent; color:var(--ink); line-height:22px; display:inline-flex; align-items:center; gap:8px; transition:transform .12s, box-shadow .12s, background .15s}
+.btn-primary,.btn-ghost,.btn-done{border-color:var(--line); box-shadow:var(--hard)}
+.btn-primary{background:var(--pink)}
+.btn-ghost{background:var(--card)}
+.btn-done{background:var(--lime)}
+.btn-primary:hover,.btn-ghost:hover,.btn-done:hover{transform:translate(-1px,-1px); box-shadow:5px 5px 0 var(--ink)}
+.btn-primary:active,.btn-ghost:active,.btn-done:active{transform:translate(3px,3px); box-shadow:1px 1px 0 var(--ink)}
+.btn-quiet{padding:7px 12px; color:var(--ink-muted); font-weight:500}
+.btn-quiet:hover{color:var(--ink); background:var(--pink-soft)}
+.btn svg{width:13px; height:13px}
+.btn:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:none}
+.btn-lg{padding:14px 28px; font-size:16px}
+:focus-visible{outline:3px solid var(--purple); outline-offset:3px}
+.chip{font:inherit; font-size:13.5px; font-weight:500; border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:999px; padding:5px 13px; cursor:pointer; transition:background .15s}
+.chip:hover{background:var(--pink-soft)}
+.chip[aria-pressed="true"]{background:var(--lime)}
+.badge{display:inline-flex; align-items:center; gap:5px; font-family:var(--pixel); font-size:12px; line-height:16px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:3px 10px; border-radius:999px; border:1.5px solid var(--line)}
+.badge svg{width:11px; height:11px}
+.badge-lilac{background:var(--lilac)}
+.badge-done{background:var(--lime)}
+.badge-stuck{background:var(--pink)}
+input[type=text],textarea{font:inherit; font-size:17px; color:var(--ink); background:#fff; border:var(--bw) solid var(--line); border-radius:16px; padding:14px 16px; width:100%; transition:box-shadow .15s}
+input[type=text]::placeholder{color:var(--ink-faint)}
+input[type=text]:focus{outline:none; box-shadow:var(--hard)}
+label.field{display:flex; flex-direction:column; gap:10px; font-weight:600}
+.check{width:26px; height:26px; flex:none; border-radius:8px; border:var(--bw) solid var(--line); background:#fff; cursor:pointer; display:grid; place-items:center; padding:0; color:var(--ink); transition:background .15s, transform .15s}
+.check:hover{background:var(--pink-soft); transform:rotate(-6deg)}
+.check.on{background:var(--pink)}
+.check svg{width:14px; height:14px}
+.check:disabled{cursor:default}
+.progress{display:flex; gap:5px}
+.progress span{flex:1; height:10px; border-radius:3px; border:1.5px solid var(--line); background:#fff}
+.progress span.on{background:var(--pink)}
+
+/* ---- timer ---- */
+.timer{display:flex; flex-direction:column; align-items:center; gap:22px; text-align:center; padding-block:24px}
+.ring{width:min(280px,72vw); aspect-ratio:1; max-width:100%; position:relative; background:var(--card); border:var(--bw) solid var(--line); border-radius:50%; box-shadow:6px 6px 0 var(--ink)}
+.ring svg{position:relative; width:100%; height:100%; transform:rotate(-90deg)}
+.ring .track{fill:none; stroke:var(--pink-soft); stroke-width:12}
+.ring .bar{fill:none; stroke:var(--pink); stroke-width:12; stroke-linecap:round; transition:stroke-dashoffset .25s linear}
+.ring .time{position:absolute; inset:0; display:grid; place-items:center; font-family:var(--num); font-size:52px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--purple)}
+
+/* ---- histórico ---- */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px}
+.stat{padding:18px; display:flex; flex-direction:column; gap:4px}
+.stat:nth-child(1){background:var(--pink-soft)} .stat:nth-child(2){background:var(--lime)} .stat:nth-child(3){background:var(--lilac)}
+.stat b{font-family:var(--num); font-size:44px; line-height:1; font-weight:700; font-variant-numeric:tabular-nums}
+.day{display:flex; flex-direction:column; gap:8px}
+.entry{display:flex; gap:14px; align-items:flex-start; padding-block:10px; border-top:1.5px dashed var(--ink-faint)}
+.entry:first-of-type{border-top:0}
+.entry .ic{flex:none; width:30px; height:30px; border-radius:50%; border:1.5px solid var(--line); display:grid; place-items:center}
+.entry .ic svg{width:12px; height:12px}
+.entry .ic.s{background:var(--lime)}
+.confirm{display:flex; flex-wrap:wrap; gap:8px; align-items:center; background:var(--pink-soft); border:1.5px solid var(--line); border-radius:16px; padding:8px 12px}
+.tip{background:#fff; border:1.5px solid var(--line); border-radius:16px; padding:12px 14px; font-size:14px; line-height:20px}
+
+/* ---- as 5 partes, cada uma um adesivo ---- */
+.p-faisca{--p1:#d6ef7e; --pf:#15111a}
+.p-chao{--p1:#c9b0ff; --pf:#15111a}
+.p-coracao{--p1:#ff8fd0; --pf:#15111a}
+.p-brilho{--p1:#7b52d9; --pf:#ffffff}
+.p-dragao{--p1:#15111a; --pf:#ffb3de}
+.pbadge{display:inline-flex; align-items:center; gap:6px; background:var(--p1); color:var(--pf); border:1.5px solid var(--line); border-radius:999px; padding:2px 11px; font-family:var(--pixel); font-size:12.5px; line-height:17px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; white-space:nowrap}
+.score{display:flex; flex-direction:column; gap:8px}
+.scorebar{display:flex; gap:4px; height:14px}
+.scorebar span{background:#fff; border:1.5px solid var(--line); border-radius:4px}
+.scorebar span.on{background:var(--p1)}
+.scoreline{display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap}
+.scoreline b{font-family:var(--num); font-size:36px; line-height:1; font-weight:700; font-variant-numeric:tabular-nums; color:var(--purple)}
+.parts{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px}
+.parts li{display:flex; gap:12px; align-items:center; padding:9px 10px; flex-wrap:wrap; border-radius:14px; border:1.5px solid transparent}
+.parts li .txt{flex:1; min-width:140px; overflow-wrap:anywhere}
+.parts li.is-done .txt{text-decoration:line-through; text-decoration-thickness:2px; text-decoration-color:var(--pink); color:var(--ink-muted)}
+.parts li.is-next{background:#fff; border-color:var(--line); box-shadow:3px 3px 0 var(--ink)}
+.flash{background:var(--lime); padding:16px 18px; display:flex; gap:14px; align-items:flex-start; box-shadow:var(--hard)}
+.flash p{flex:1}
+.concept{background:var(--pink-soft); border:1.5px solid var(--line); border-radius:16px; padding:12px 14px; font-size:14px; line-height:21px}
+.concept b{display:block; font-family:var(--pixel); font-weight:700; font-size:12.5px; line-height:16px; letter-spacing:.05em; text-transform:uppercase; color:var(--purple); margin-bottom:3px}
+.partcard{position:relative; overflow:hidden}
+.partcard::before{content:""; position:absolute; top:0; left:0; right:0; height:10px; background:var(--p1); border-bottom:var(--bw) solid var(--line)}
+.partcard > *{position:relative}
+.warn{background:#fff; border:var(--bw) dashed var(--accent-text); border-radius:16px; padding:12px 14px; font-size:14px; line-height:20px}
+details{padding:14px 20px}
+details summary{cursor:pointer; font-family:var(--pixel); font-weight:700; font-size:16px}
+details[open]{background:#fff}
+details[open] summary{margin-bottom:8px}
+.map{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px}
+.map div{background:var(--p1); color:var(--pf); border:var(--bw) solid var(--line); border-radius:18px; padding:12px 10px; display:flex; flex-direction:column; gap:2px; min-width:0; box-shadow:3px 3px 0 var(--ink)}
+.map div b{font-family:var(--num); font-weight:700; font-size:30px; line-height:1; font-variant-numeric:tabular-nums}
+.map div span{font-family:var(--pixel); font-weight:500; font-size:11.5px; line-height:14px; letter-spacing:.03em; text-transform:uppercase; overflow-wrap:anywhere}
+.milestones{display:flex; flex-wrap:wrap; gap:6px}
+.milestones span{font-size:12.5px; font-weight:500; line-height:16px; border:1.5px solid var(--line); border-radius:999px; padding:4px 10px; background:#fff; color:var(--ink-muted)}
+.milestones span.on{color:var(--ink); background:var(--lilac)}
+
+/* ---- início: bento de adesivos ---- */
+.lobby{display:grid; grid-template-columns:1fr; gap:16px; padding-block:6px 4px}
+.hero-box{padding:28px 24px 26px; display:flex; flex-direction:column; align-items:flex-start; gap:16px; position:relative; overflow:hidden}
+.hero-box .spark{position:absolute; color:var(--lime); width:30px; height:30px; stroke:var(--line); stroke-width:1.5}
+.hero-box .spark.s1{right:22px; top:22px} .hero-box .spark.s2{right:64px; top:58px; width:18px; height:18px; color:var(--pink)}
+.greet{font-family:var(--pixel); font-size:14px; line-height:16px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-muted); display:inline-flex; gap:8px; align-items:center}
+.home-title{font-family:var(--pixel); font-weight:700; font-size:clamp(42px,7vw,76px); line-height:.98; letter-spacing:-.02em; margin:0; text-wrap:balance; color:var(--purple); max-width:13ch}
+.home-sub{color:var(--ink-muted); font-size:16.5px; line-height:26px; max-width:30rem; text-wrap:pretty}
+.btn-xl{padding:16px 30px; font-size:17px; font-weight:700; margin-top:4px}
+.link{background:none; border:0; font:inherit; font-size:14.5px; color:var(--ink-muted); cursor:pointer; padding:4px 0; text-align:left; overflow-wrap:anywhere; text-decoration:underline; text-decoration-color:var(--pink); text-decoration-thickness:2px; text-underline-offset:4px}
+.link:hover{color:var(--ink)}
+.link b{font-weight:600; color:var(--ink)}
+.screen-box{background:var(--lilac); padding:18px; display:flex; flex-direction:column; gap:14px; justify-content:space-between}
+.screen{flex:1; justify-content:center; background:var(--lime); border:var(--bw) solid var(--line); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:10px; font-family:var(--pixel); box-shadow:inset 0 0 0 4px rgba(255,255,255,.35)}
+.screen .big{font-family:var(--num); font-size:56px; line-height:1; font-weight:700}
+.screen .lbl{font-size:13px; letter-spacing:.06em; text-transform:uppercase}
+.px{display:flex; gap:3px}
+.px i{flex:1; height:14px; border:1.5px solid var(--line); background:rgba(255,255,255,.55)}
+.px i.on{background:var(--purple)}
+.screen-foot{font-family:var(--num) !important; display:flex; justify-content:space-between; align-items:center; font-family:var(--pixel); font-size:13px; letter-spacing:.05em; text-transform:uppercase}
+.btns{display:flex; gap:6px}
+.btns i{width:14px; height:14px; border-radius:50%; border:1.5px solid var(--line); background:var(--pink)}
+.btns i:nth-child(2){background:var(--card)}
+.stickers{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px}
+.sticker{aspect-ratio:1; border-radius:50%; background:var(--p1); color:var(--pf); border:var(--bw) solid var(--line); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; text-align:center; box-shadow:3px 3px 0 var(--ink); padding:6px; min-width:0}
+.sticker:hover{animation:wiggle .5s ease}
+.sticker svg{width:38%; height:38%}
+.sticker b{font-family:var(--num); font-size:clamp(13px,2.4vw,22px); line-height:1; font-weight:700}
+.sticker span{font-family:var(--pixel); font-size:clamp(8.5px,1.4vw,12px); line-height:1.1; font-weight:500; text-transform:uppercase; letter-spacing:.03em; overflow-wrap:anywhere}
+.checker-box{overflow:hidden; display:grid; grid-template-columns:1fr; }
+.checker{height:64px; background-color:var(--pink); background-image:linear-gradient(45deg, var(--lime) 25%, transparent 25%, transparent 75%, var(--lime) 75%), linear-gradient(45deg, var(--lime) 25%, transparent 25%, transparent 75%, var(--lime) 75%); background-size:32px 32px; background-position:0 0, 16px 16px; border-bottom:var(--bw) solid var(--line)}
+.checker-box p{padding:16px 22px; font-weight:600; font-size:15px}
+.checker-box p em{font-family:var(--script); font-style:italic; font-weight:400; font-size:1.25em; color:var(--accent-text)}
+.home-nav{display:none}
+@media (min-width:860px){
+  .lobby{grid-template-columns:1.65fr 1fr}
+  .hero-box{grid-row:span 1; padding:40px 40px 36px}
+  .stickers,.checker-box{grid-column:1 / -1}
+  .stickers{grid-template-columns:repeat(5,minmax(0,150px)); justify-content:space-between}
+  .sticker span{font-size:12px}
+  .checker-box{grid-template-columns:220px 1fr; align-items:center}
+  .checker{height:100%; min-height:72px; border-bottom:0; border-right:var(--bw) solid var(--line)}
+}
+@media (max-width:520px){
+  h1{font-size:32px} .display{font-size:28px}
+  .map{gap:5px} .map div{padding:10px 6px; border-radius:14px} .map div b{font-size:22px} .map div span{font-size:9.5px; letter-spacing:0}
+  .brand span{display:none}
+  .quiet-nav button{padding:6px 9px; font-size:13px}
+  .stickers{gap:6px} .sticker{box-shadow:2px 2px 0 var(--ink)}
+}
+@media (prefers-reduced-motion:reduce){ main > .enter, .sticker:hover{animation:none} .btn, .check{transition:none} }
+
+/* ---- início: ninho da Brasinha ---- */
+.nest{width:100%; max-width:520px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:16px; padding-block:6px 4px}
+.pet-card{width:100%; padding:22px 22px 20px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px}
+.bubble{position:relative; background:#fff; border:var(--bw) solid var(--line); border-radius:20px; padding:12px 16px; font-weight:500; font-size:15.5px; line-height:22px; max-width:30ch; text-wrap:balance; box-shadow:3px 3px 0 var(--ink); margin-bottom:6px}
+.bubble::after{content:""; position:absolute; left:50%; bottom:-9px; width:14px; height:14px; margin-left:-7px; background:#fff; border-right:var(--bw) solid var(--line); border-bottom:var(--bw) solid var(--line); rotate:45deg}
+.bubble em{font-family:var(--script); font-style:italic; font-size:1.25em; color:var(--accent-text)}
+.pet{position:relative; width:min(250px,64vw); aspect-ratio:1.05; max-width:100%}
+.pet svg{width:100%; height:100%; overflow:visible; display:block}
+.pet .body{transform-box:fill-box; transform-origin:50% 100%; animation:bob 3.4s ease-in-out infinite}
+.pet.mood-sleepy .body{animation-duration:6s}
+.pet.eating .body{animation:chomp .5s .55s ease-in-out 2}
+@keyframes bob{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-4px) scaleY(1.02)}}
+@keyframes chomp{0%,100%{transform:scale(1,1)}40%{transform:scale(1.08,.92)}70%{transform:scale(.96,1.05)}}
+.snack{position:absolute; left:50%; top:50%; font-size:34px; line-height:1; color:#d6ef7e; -webkit-text-stroke:1.5px #15111a; pointer-events:none; animation:snack .7s cubic-bezier(.5,0,.6,1) both}
+@keyframes snack{from{transform:translate(90px,-120px) scale(1.2) rotate(0deg); opacity:1}to{transform:translate(-50%,-10%) scale(.2) rotate(180deg); opacity:0}}
+.pet-id{display:flex; align-items:baseline; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:4px}
+.pet-name{font-family:var(--pixel); font-size:34px; line-height:1; color:var(--ink)}
+.pet-stage{font-family:var(--num); font-size:11px; letter-spacing:.06em; text-transform:uppercase; background:var(--lime); border:1.5px solid var(--line); border-radius:999px; padding:3px 9px}
+.pet-lvl{font-family:var(--pixel); font-size:20px; font-weight:500}
+.pet-lvl small{font-family:var(--sans); font-size:13px; color:var(--ink-muted)}
+.xpbar{width:100%; height:18px; margin-top:8px; background:#fff; border:var(--bw) solid var(--line); border-radius:999px; overflow:hidden}
+.xpbar span{display:block; height:100%; background:var(--ink); border-right:var(--bw) solid var(--line); transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.xpends{width:100%; display:flex; justify-content:space-between; font-family:var(--num); font-size:11px; letter-spacing:.04em; color:var(--ink-muted)}
+.feed-row{width:100%; display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:12px; padding-top:14px; border-top:1.5px dashed var(--ink-faint); flex-wrap:wrap}
+.sparks{font-size:14px; color:var(--ink-muted)}
+.belly{font-size:12.5px; font-weight:600; border:1.5px solid var(--line); border-radius:999px; padding:4px 11px; background:#fff; color:var(--ink-muted)}
+.belly.full{background:var(--lime); color:var(--ink)} .sparks b{font-family:var(--num); font-size:16px; color:var(--ink)}
+.nest .cta{width:100%; justify-content:space-between; background:var(--ink); color:#fff8f7; font-family:var(--sans); font-weight:700; font-size:15px; letter-spacing:.12em; text-transform:uppercase; padding:18px 26px; box-shadow:4px 4px 0 var(--pink)}
+.nest .cta:hover{box-shadow:6px 6px 0 var(--pink)}
+.nest .cta:active{box-shadow:1px 1px 0 var(--pink)}
+.nest .link{text-align:center}
+.circles{width:100%; display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:4px}
+.circles button{display:flex; flex-direction:column; align-items:center; gap:6px; background:none; border:0; cursor:pointer; font:inherit; font-size:13px; font-weight:600; color:var(--ink-muted); padding:0}
+.circles button svg{width:100%; max-width:84px; aspect-ratio:1; padding:22%; box-sizing:border-box; background:var(--card); border:var(--bw) solid var(--line); border-radius:50%; box-shadow:3px 3px 0 var(--ink); transition:transform .15s, box-shadow .15s}
+.circles button:hover svg{transform:translate(-1px,-1px) rotate(-4deg); box-shadow:5px 5px 0 var(--ink)}
+.circles button:hover{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){ .pet .body, .snack{animation:none} }
+
+/* ---- Brasinha dentro da telinha verde ---- */
+.screen{align-items:stretch; text-align:center}
+.scr-top{display:flex; justify-content:space-between; gap:8px}
+.screen .pet{width:min(200px,62%); margin:0 auto}
+.scr-say{font-family:var(--pixel); font-size:15px; line-height:20px; min-height:20px}
+.scr-say em{font-family:var(--script); font-style:italic; font-size:1.2em; color:var(--accent-text)}
+.screen .px{margin-top:2px}
+.screen-box .screen-foot span:last-child{font-family:var(--num)}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header id="topbar">
+    <button class="brand" data-go="inicio" aria-label="Voltar ao início"><svg class="mini" viewBox="0 0 9 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="#ff8fd0" stroke="#15111a" stroke-width=".35" d="M1 0h2v1h1v1h1V1h1V0h2v1h1v3H8v1H7v1H6v1H5v1H4V7H3V6H2V5H1V4H0V1h1z"/></svg><span>Procrastinação</span></button>
+    <nav class="quiet-nav" aria-label="Seções">
+      <button id="go-tarefas" data-go="tarefas">Tarefas</button><span class="ast" aria-hidden="true">✳</span>
+      <button id="go-metodo" data-go="metodo">Método</button><span class="ast" aria-hidden="true">✳</span>
+      <button id="go-historico" data-go="historico">Histórico</button>
+    </nav>
+  </header>
+  <main id="app"></main>
+  <footer class="foot"><span id="save-status" class="status"><i></i><span>Conectando…</span></span></footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- o método ---------- */
+const PARTS = {
+  faisca: {name:"Faísca", pts:25, tag:"O primeiro gesto, sem nenhuma decisão",
+    guide:"Uma ação física e óbvia, que você faria no automático. Nada de escolher, planejar ou pensar. Zero atrito. O objetivo aqui é só engajar.",
+    ask:"Qual é o gesto mais bobo que te coloca dentro da tarefa?",
+    examples:["Abrir o notebook","Abrir o arquivo da tarefa","Colocar o caderno na mesa","Pegar a caneta"],
+    concept:["Ação oposta · DBT","A emoção manda fugir. Você faz o oposto, bem pequeno. Não é pra avançar, é só pra entrar."],
+    win:"Você engajou. Ação veio antes da vontade, e é assim mesmo que funciona (ativação comportamental, TCC)."},
+  chao: {name:"Chão Firme", pts:20, tag:"Dá pra fazer até no seu pior dia",
+    guide:"Uma parte real da tarefa, mas tão tranquila que você faria cansado, triste ou sem vontade nenhuma.",
+    ask:"O que você conseguiria fazer mesmo num dia horrível?",
+    examples:["Ler o que já existe","Anotar 3 tópicos soltos","Juntar os arquivos numa pasta","Copiar o modelo"],
+    concept:["Construir domínio · DBT","Fazer algo possível, um pouco desafiador, com frequência. Cada vez que você cumpre, a mente aprende: eu dou conta."],
+    win:"45 pontos: você saiu do zero. A tarefa não está completa, mas amanhã ela já começa mais leve."},
+  coracao: {name:"Coração", pts:25, tag:"O núcleo que faz a tarefa existir",
+    guide:"A parte que, feita, deixa a tarefa completa. Sem enfeite, sem perfeição. Se só até aqui ficar pronto, a tarefa está entregue.",
+    ask:"Sem o quê essa tarefa não existe?",
+    examples:["Escrever o rascunho inteiro","Preencher os campos principais","Resolver as questões","Mandar a resposta"],
+    concept:["Tarefa graduada · TCC","Você chega ao difícil subindo degraus. Quando o Coração chega, a Faísca e o Chão Firme já baixaram a ansiedade."],
+    win:"70 pontos: a tarefa está completa. Feito é melhor que perfeito."},
+  brilho: {name:"Brilho", pts:20, tag:"O que faz ficar excelente",
+    guide:"O aperfeiçoamento: revisar, caprichar, ir além. Aqui a tarefa deixa de ser só feita e fica extraordinária.",
+    ask:"O que transformaria o feito em excelente?",
+    examples:["Revisar e melhorar o texto","Deixar o visual bonito","Adicionar um exemplo","Conferir os detalhes"],
+    concept:["Dialética · DBT","Duas verdades juntas: o que você fez já basta E você pode ir além. Troque o “mas” pelo “e”."],
+    win:"90 pontos. Isso é excelente. Você já provou pra si mesmo que dá conta."},
+  dragao: {name:"Dragão", pts:10, tag:"A parte que mais paralisa. Vai por último.",
+    guide:"Aquela parte que você evita só de pensar. Ela vale só 10 de propósito: tira o peso de cima. Quando chegar nela, você terá 90 pontos e estará aquecido.",
+    ask:"Qual parte faz você querer fechar tudo e ir fazer outra coisa?",
+    examples:["Ligar para alguém","Mostrar para o chefe","Apertar enviar","Pedir ajuda"],
+    concept:["Aceitação radical · DBT","Aceitar que essa parte é difícil, sem brigar com isso. Você não precisa gostar dela. Só precisa fazer, depois de todo o resto."],
+    win:"100. Dragão vencido. Não precisava gostar, só fazer."}
+};
+const ORDER = ["faisca","chao","coracao","brilho","dragao"];          // ordem de execução
+const FILL  = ["dragao","faisca","chao","coracao","brilho"];          // ordem de montagem: nomeia o dragão primeiro
+const MILESTONES = [[25,"Engajou"],[45,"Saiu do zero"],[70,"Completa"],[90,"Excelente"],[100,"Dragão vencido"]];
+const DECISION = /\b(decidir|escolher|definir|pensar|planejar|avaliar|ver se|ou|qual|quais|onde|como vou)\b|\?/i;
+
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const now = () => Date.now();
+const clone = o => JSON.parse(JSON.stringify(o));
+const ICON_CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5"/></svg>';
+const ICON_PLAY = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>';
+const ICON_THOUGHT = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 2.5c3.3 0 5.5 2 5.5 4.5S11.3 11.5 8 11.5c-.7 0-1.3-.1-1.9-.2L3 13l.8-2.6C2.9 9.5 2.5 8.3 2.5 7 2.5 4.5 4.7 2.5 8 2.5z"/></svg>';
+const pbadge = (k, withPts) => `<span class="pbadge p-${k}">${esc(PARTS[k].name)}${withPts?` · <span class="pts">${PARTS[k].pts}</span>`:""}</span>`;
+
+const LS_KEY = "procrastinacao.v1";
+/* ---------- store: privado por pessoa, memória como reserva ---------- */
+const store = {
+  mem: new Map(), col: null, mode: "connecting",
+  all(kind){ return [...this.mem.values()].filter(d => d.kind === kind); },
+  get(id){ return this.mem.get(id); },
+  loadLocal(){ try { const raw = localStorage.getItem(LS_KEY); if (raw) JSON.parse(raw).forEach(d => this.mem.set(d.id, d)); } catch(e){} },
+  saveLocal(){ if (this.mode !== "local") return; try { localStorage.setItem(LS_KEY, JSON.stringify([...this.mem.values()])); } catch(e){ this.mode = "memory"; setStatus(); } },
+  put(id, body){ this.mem.set(id, Object.assign({id}, body)); this.saveLocal(); render(); if (this.col) this.col.doc(id).set(body).catch(e => this.fail(e)); },
+  del(id){ this.mem.delete(id); this.saveLocal(); render(); if (this.col) this.col.doc(id).delete().catch(e => this.fail(e)); },
+  fail(e){ state.error = e && e.code === "quota_exceeded" ? "Limite de registros atingido. Apague tarefas antigas para liberar espaço." : "Não consegui salvar a última mudança. Ela vale só até recarregar a página."; render(); },
+  async init(){
+    let db = null, user = null;
+    try { if (window.claude && window.claude.use) [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]); } catch(e){}
+    const id = user ? await user.id() : null;
+    if (!db || !id){ this.mode = "local"; this.loadLocal(); setStatus(); render(); return; }
+    this.col = db.collection("data/users/" + id);
+    this.col.onSnapshot(snap => {
+      const m = new Map();
+      snap.docs.forEach(d => m.set(d.id, Object.assign({id:d.id}, clone(d.data()))));
+      this.mem = m; this.mode = "saved"; setStatus(); render();
+    }, () => { this.mode = "memory"; this.col = null; setStatus(); });
+  }
+};
+function setStatus(){
+  const el = $("#save-status");
+  el.classList.toggle("off", store.mode !== "saved");
+  el.querySelector("span").textContent = store.mode === "saved" ? "Salvo na sua conta, só você vê" : store.mode === "local" ? "Salvo neste navegador" : store.mode === "memory" ? "Nesta visualização nada é salvo" : "Conectando…";
+}
+
+/* ---------- estado ---------- */
+const state = { petSay:null, petAnim:null, petQueue:null, tab:"inicio", flow:null, timer:null, error:null, flash:null, confirmDel:null };
+const EXAMPLE = {id:"exemplo", kind:"task", example:true, title:"Responder o e-mail da contadora", createdAt:now(), parts:[
+  {key:"faisca", text:"Abrir o e-mail dela", done:true},
+  {key:"chao", text:"Ler até o fim e copiar as perguntas num rascunho", done:false},
+  {key:"coracao", text:"Responder cada pergunta do jeito mais simples", done:false},
+  {key:"brilho", text:"Revisar o tom e anexar os comprovantes", done:false},
+  {key:"dragao", text:"Admitir que atrasei o documento e pedir mais prazo", done:false}]};
+
+function partsOf(t){
+  if (t.parts) return t.parts;
+  const s = t.steps || [];   // tarefas antigas com micro-passos
+  return ORDER.map((k,i) => ({key:k, text: s[i] ? s[i].text : "", done: !!(s[i] && s[i].done), doneAt: s[i] && s[i].doneAt || null}));
+}
+function score(t){ return partsOf(t).reduce((a,p) => a + (p.done ? PARTS[p.key].pts : 0), 0); }
+function nextPart(t){ const ps = partsOf(t); return ps.findIndex(p => !p.done); }
+function milestone(n){ let m = ""; MILESTONES.forEach(([v,l]) => { if (n >= v) m = l; }); return m; }
+function tasks(){ return store.all("task").sort((a,b) => (a.doneAt?1:0)-(b.doneAt?1:0) || b.createdAt - a.createdAt); }
+
+/* ---------- render ---------- */
+function render(){
+  consumePetQueue();
+  document.body.classList.toggle("home", state.tab === "inicio" && !state.timer);
+  document.querySelectorAll(".quiet-nav [data-go]").forEach(b => b.setAttribute("aria-current", b.dataset.go === state.tab && !state.timer ? "page" : "false"));
+  let html = state.error ? `<div class="warn" role="status">${esc(state.error)} <button class="btn btn-quiet" data-act="dismiss-error">Ok</button></div>` : "";
+  if (state.flash && !state.timer) html += flashBox();
+  if (state.timer) html += viewTimer();
+  else if (state.tab === "destravar") html += viewFlow();
+  else if (state.tab === "metodo") html += viewMethod();
+  else if (state.tab === "historico") html += viewHistory();
+  else if (state.tab === "tarefas") html += viewToday();
+  else html = viewHome();
+  const focusId = document.activeElement && document.activeElement.id;
+  const viewKey = state.timer ? "timer" + (state.timer.finished ? "-end" : "") : state.tab + (state.tab === "destravar" && state.flow ? state.flow.step : "");
+  const enter = viewKey !== render.last; render.last = viewKey;
+  $("#app").innerHTML = `<div class="stack${enter ? " enter" : ""}" style="flex:1">${html}</div>`;
+  bindOrb();
+  if (focusId){ const f = document.getElementById(focusId); if (f && f.tagName !== "BUTTON"){ f.focus(); if (f.setSelectionRange && f.value) f.setSelectionRange(f.value.length, f.value.length); } }
+  if (state.timer) tick();
+}
+function flashBox(){ const f = state.flash; return `<div class="flash" role="status"><span class="pbadge p-${f.key}">+${PARTS[f.key].pts}</span><p><b>${esc(PARTS[f.key].name)} feita.</b> ${esc(PARTS[f.key].win)} ${f.key === "faisca" ? "<b>A Brasinha comeu essa faísca \u2726</b>" : ""}</p><button class="btn btn-quiet" data-act="dismiss-flash" aria-label="Fechar">Ok</button></div>`; }
+
+function scoreBlock(t){
+  const n = score(t), ps = partsOf(t);
+  return `<div class="score"><div class="scoreline"><span><b>${n}</b> <span class="muted">/ 100</span></span><span class="small ${n?"":"muted"}" style="${n?"color:var(--done)":""}">${n ? esc(milestone(n)) : "Ainda no zero, e tudo bem"}</span></div>
+    <div class="scorebar" role="img" aria-label="${n} de 100 pontos">${ps.map(p => `<span class="p-${p.key}${p.done?" on":""}" style="flex:${PARTS[p.key].pts}"></span>`).join("")}</div></div>`;
+}
+
+function taskCard(t){
+  const ps = partsOf(t), n = nextPart(t), finished = !!t.doneAt, del = state.confirmDel === t.id;
+  return `<article class="card" aria-label="${esc(t.title)}">
+    <div class="stack-sm">
+      <div class="row">${t.example ? '<span class="badge badge-lilac">Exemplo</span>' : ""}${finished ? `<span class="badge badge-done">${ICON_CHECK} Arquivada</span>` : t.stuck ? '<span class="badge badge-stuck">Travada</span>' : ""}</div>
+      <h2 style="overflow-wrap:anywhere">${esc(t.title)}</h2>
+    </div>
+    ${scoreBlock(t)}
+    <ul class="parts">${ps.map((p,i) => `<li class="${p.done?"is-done":""}${i===n && !finished?" is-next":""}">
+      <button class="check${p.done?" on":""}" data-act="toggle-part" data-task="${t.id}" data-i="${i}" aria-pressed="${p.done}" aria-label="${p.done?"Desmarcar":"Marcar"} ${esc(PARTS[p.key].name)}" ${t.example?"disabled":""}>${p.done?ICON_CHECK:""}</button>
+      ${pbadge(p.key,true)}<span class="txt">${esc(p.text) || '<span class="muted">sem definir</span>'}</span></li>`).join("")}</ul>
+    <div class="row between">
+      <div class="row">
+        ${t.example ? `<button class="btn btn-primary" data-act="adopt-example">Usar este exemplo</button>`
+        : finished ? `<button class="btn btn-ghost" data-act="reopen" data-task="${t.id}">Reabrir</button>`
+        : n >= 0 ? `<button class="btn btn-primary" data-act="start" data-task="${t.id}">${ICON_PLAY} ${esc(PARTS[ps[n].key].name)} · 5 min</button>`
+        : `<button class="btn btn-done" data-act="finish" data-task="${t.id}">Arquivar com 100</button>`}
+      </div>
+      ${t.example ? "" : `<div class="row">
+        ${!finished ? `<button class="btn btn-quiet" data-act="edit" data-task="${t.id}">Editar partes</button><button class="btn btn-quiet" data-act="finish" data-task="${t.id}">Arquivar</button>` : ""}
+        <button class="btn btn-quiet" data-act="ask-del" data-task="${t.id}">Apagar</button></div>`}
+    </div>
+    ${del ? `<div class="confirm" role="alert"><span>Apagar esta tarefa? O histórico dela continua.</span><button class="btn btn-quiet" data-act="del" data-task="${t.id}">Sim, apagar</button><button class="btn btn-quiet" data-act="cancel-del">Manter</button></div>` : ""}
+  </article>`;
+}
+
+function viewToday(){
+  const list = tasks(), open = list.filter(t => !t.doneAt), closed = list.filter(t => t.doneAt);
+  const hero = `<div class="row between"><h1>Suas <em>tarefas</em></h1><button class="btn btn-primary" data-act="new-flow">Nova tarefa</button></div>`;
+  const body = !list.length ? `<div class="stack"><p class="small muted">É assim que uma tarefa fica dividida:</p>${taskCard(EXAMPLE)}</div>`
+    : `<section class="stack" aria-labelledby="h-open"><h2 id="h-open">Em andamento</h2>${open.length ? open.map(taskCard).join("") : `<p class="muted">Nada em aberto. Descanso também faz parte.</p>`}</section>
+      ${closed.length ? `<section class="stack" aria-labelledby="h-closed"><h2 id="h-closed">Arquivadas</h2>${closed.slice(0,5).map(taskCard).join("")}</section>` : ""}`;
+  return hero + body;
+}
+
+/* ---------- destravar: montar as 5 partes ---------- */
+const FLOW_STEPS = ["Tarefa", ...FILL.map(k => PARTS[k].name), "Mapa"];
+function viewFlow(){
+  const f = state.flow || (startFlow(null), state.flow);
+  const total = FLOW_STEPS.length;
+  const bar = `<div class="stack-sm"><span class="label">Etapa ${f.step} de ${total} · ${esc(FLOW_STEPS[f.step-1])}</span><div class="progress" aria-hidden="true">${FLOW_STEPS.map((_,i)=>`<span class="${i<f.step?"on":""}"></span>`).join("")}</div></div>`;
+  const nav = (ok, extra) => `<div class="row between"><button class="btn btn-quiet" data-act="${f.step===1?"cancel-flow":"flow-back"}">${f.step===1?"Cancelar":"Voltar"}</button><div class="row">${extra||""}<button class="btn btn-primary" data-act="flow-next" ${ok?"":"disabled"}>Continuar</button></div></div>`;
+  let inner = "";
+  if (f.step === 1) inner = `<h1>O que está <em>travando</em>?</h1>
+    <label class="field" for="f-title">A tarefa, do jeito que ela aparece na sua cabeça
+      <input type="text" id="f-title" data-input="flow" data-key="title" value="${esc(f.title)}" placeholder="Ex: fazer a declaração do imposto"></label>
+    <p class="hint">Não precisa ser bonito. Agora a gente divide ela em 5 partes, com pesos diferentes.</p>${nav(f.title.trim())}`;
+  else if (f.step >= 2 && f.step < total){
+    const k = FILL[f.step-2], P = PARTS[k], v = f.parts[k] || "";
+    const isDecision = k === "faisca" && v.trim() && DECISION.test(v);
+    const intro = k === "dragao" ? `<p class="muted">Vamos começar pelo que assusta, só pra tirar da cabeça e colocar no lugar certo: o fim da fila.</p>` : "";
+    inner = `${intro}<div class="card partcard p-${k}">
+      <div class="row between">${pbadge(k)}<span class="pts" style="font-size:22px">${P.pts} pontos</span></div>
+      <h1>${esc(P.tag)}</h1>
+      <p>${esc(P.guide)}</p>
+      <label class="field" for="f-part">${esc(P.ask)}
+        <input type="text" id="f-part" data-input="part" data-key="${k}" value="${esc(v)}" placeholder="Ex: ${esc(P.examples[0].toLowerCase())}"></label>
+      <div id="decision-warn" class="warn" ${isDecision?"":"hidden"}>Isso parece ter uma decisão ou pergunta. A Faísca não pode ter escolha nenhuma. Tente algo físico: abrir, pegar, colocar.</div>
+      <div class="row">${P.examples.map(x=>`<button class="chip" data-act="part-example" data-key="${k}" data-val="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+      <div class="concept"><b>${esc(P.concept[0])}</b>${esc(P.concept[1])}</div>
+    </div>${nav(v.trim())}`;
+  }
+  else {
+    const t = {parts: ORDER.map(k => ({key:k, text:f.parts[k], done:false}))};
+    inner = `<h1>Seu <em>mapa</em></h1>
+    <p class="muted">Na ordem em que você vai fazer. Repare: a mais fácil vale 25, a que paralisa vale só 10.</p>
+    <div class="map" aria-hidden="true">${ORDER.map(k=>`<div class="p-${k}"><b>${PARTS[k].pts}</b><span>${esc(PARTS[k].name)}</span></div>`).join("")}</div>
+    <ul class="parts">${t.parts.map(p=>`<li>${pbadge(p.key,true)}<span class="txt">${esc(p.text)}</span></li>`).join("")}</ul>
+    <div class="milestones">${MILESTONES.map(([v,l])=>`<span>${v} · ${esc(l)}</span>`).join("")}</div>
+    <div class="card"><span class="label">Agora é só a Faísca</span><p class="display" style="font-size:28px;line-height:34px">${esc(f.parts.faisca)}</p>
+      <div class="row">${[2,5,10].map(m=>`<button class="chip" data-act="flow-min" data-val="${m}" aria-pressed="${f.minutes===m}">${m} min</button>`).join("")}</div></div>
+    <div class="row between"><button class="btn btn-quiet" data-act="flow-back">Voltar</button><div class="row"><button class="btn btn-quiet" data-act="flow-save">Salvar pra depois</button><button class="btn btn-primary btn-lg" data-act="flow-go">Acender a Faísca</button></div></div>`;
+  }
+  return bar + `<section class="stack">${inner}</section>`;
+}
+function startFlow(taskId, atParts){
+  const t = taskId && store.get(taskId);
+  const parts = {}; ORDER.forEach(k => parts[k] = "");
+  if (t) partsOf(t).forEach(p => parts[p.key] = p.text || "");
+  state.flow = {taskId: t ? t.id : null, step: t ? 2 : 1, title: t ? t.title : "", parts, minutes:5};
+  state.tab = "destravar";
+}
+function commitFlow(){
+  const f = state.flow;
+  let id = f.taskId; const t = id && store.get(id);
+  const old = t ? partsOf(t) : [];
+  const body = t ? clone(t) : {kind:"task", createdAt:now()};
+  delete body.id; delete body.steps;
+  body.title = f.title.trim(); body.stuck = false;
+  body.parts = ORDER.map(k => { const o = old.find(p => p.key === k); const txt = f.parts[k].trim(); return {key:k, text:txt, done: !!(o && o.done && o.text === txt), doneAt: o && o.done && o.text === txt ? o.doneAt || null : null}; });
+  if (!id) id = uid("t");
+  store.put(id, body);
+  state.flow = null;
+  return {id};
+}
+
+/* ---------- método ---------- */
+function viewMethod(){
+  return `<h1>O método das <em>5 partes</em></h1>
+  <p class="muted" style="max-width:62ch">Tarefas grandes paralisam porque a mente enxerga o todo e o pior pedaço ao mesmo tempo. Aqui você divide a tarefa em 5 partes com pesos diferentes. Os pontos não medem esforço, medem progresso: por isso a parte mais fácil vale mais que a mais difícil.</p>
+  <div class="map" aria-hidden="true">${ORDER.map(k=>`<div class="p-${k}"><b>${PARTS[k].pts}</b><span>${esc(PARTS[k].name)}</span></div>`).join("")}</div>
+  <div class="stack">${ORDER.map((k,i)=>{ const P = PARTS[k]; const acc = ORDER.slice(0,i+1).reduce((a,x)=>a+PARTS[x].pts,0);
+    return `<div class="card partcard p-${k}"><div class="row between">${pbadge(k)}<span class="small muted">vale ${P.pts} · acumulado ${acc}</span></div>
+      <h2>${esc(P.tag)}</h2><p>${esc(P.guide)}</p><div class="concept"><b>${esc(P.concept[0])}</b>${esc(P.concept[1])}</div></div>`; }).join("")}</div>
+  <div class="stack-sm"><span class="label">Marcos</span><div class="milestones">${MILESTONES.map(([v,l])=>`<span class="on">${v} · ${esc(l)}</span>`).join("")}</div>
+  <p class="small muted">Faísca + Chão Firme = 45. A tarefa não está pronta, mas você saiu do zero e o dia seguinte começa mais leve.</p></div>
+  <h2>Os conceitos por trás</h2>
+  <details><summary>TCC · Ativação comportamental</summary><p>A motivação costuma vir depois da ação, não antes. Esperar vontade é a armadilha. A Faísca existe pra isso: agir primeiro, bem pequeno.</p></details>
+  <details><summary>TCC · Pensamento automático</summary><p>Frases rápidas que a mente solta sem você pedir (“vai dar errado”). Não são fatos. Notar, nomear e questionar já tira parte da força delas.</p></details>
+  <details><summary>DBT · Ação oposta</summary><p>Cada emoção tem um impulso: medo quer fugir, vergonha quer se esconder. Quando o impulso não te ajuda, você faz o oposto, em versão mínima.</p></details>
+  <details><summary>DBT · Construir domínio</summary><p>Fazer todo dia algo possível e um pouco desafiador. Isso ensina à mente que você é capaz, e esse sentimento protege contra a próxima paralisia.</p></details>
+  <details><summary>DBT · Dialética</summary><p>Duas coisas podem ser verdade ao mesmo tempo: “eu tô travado” <i>e</i> “eu posso dar um passo”. Aceitar onde você está e mudar não se anulam.</p></details>
+  <details><summary>DBT · Aceitação radical</summary><p>Parar de brigar com o fato de que algo é difícil. Brigar gasta energia. Aceitar libera energia pra agir, mesmo sem gostar.</p></details>
+  <details><summary>A Brasinha ✦</summary><p>Sua mascote come faíscas: toda vez que você conclui a Faísca de uma tarefa, ela come e ganha +10 XP. Os pontos de todas as partes também viram XP. Ela evolui: Faísca, Chaminha, Brasa, Fogueira e Fênix.</p><p>Ela nunca morre nem fica triste com você. No máximo cochila e espera. Isso é reforço positivo (TCC): o app celebra o que você fez e ignora o que faltou.</p></details>
+  <details><summary>DBT · Mente sábia</summary><p>O ponto de encontro entre a mente emocional e a racional. Ela não ignora o que você sente, mas também não deixa o sentimento decidir sozinho.</p></details>
+  <p class="small muted">Este app apoia hábitos e não substitui acompanhamento com um profissional de saúde mental.</p>`;
+}
+
+/* ---------- timer ---------- */
+let tickHandle = null, wake = null;
+function startTimer(taskId, minutes){
+  const t = store.get(taskId); const idx = nextPart(t);
+  state.flash = null;
+  state.timer = {taskId, partIdx: idx, total: minutes*60, endAt: now()+minutes*60e3, remaining: minutes*60, running:true, finished:false, elapsed:0};
+  try { navigator.wakeLock && navigator.wakeLock.request("screen").then(w=>wake=w).catch(()=>{}); } catch(e){}
+  clearInterval(tickHandle); tickHandle = setInterval(tick, 250);
+  window.scrollTo(0,0); render();
+}
+function tick(){
+  const tm = state.timer; if (!tm || tm.finished) return;
+  const rem = tm.running ? Math.max(0,(tm.endAt-now())/1000) : tm.remaining;
+  const bar = $("#ring-bar"), tx = $("#ring-time");
+  if (bar) bar.setAttribute("stroke-dashoffset", String(326.73 * (1 - rem/tm.total)));
+  if (tx){ const s = Math.ceil(rem); tx.textContent = String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+  if (tm.running && rem <= 0) finishTimer(false);
+}
+function finishTimer(early){
+  const tm = state.timer; if (!tm || tm.finished) return;
+  const rem = tm.running ? Math.max(0,(tm.endAt-now())/1000) : tm.remaining;
+  tm.elapsed = Math.round(tm.total - rem); tm.finished = true; tm.early = early; tm.running = false;
+  clearInterval(tickHandle); try { wake && wake.release(); } catch(e){}
+  const t = store.get(tm.taskId), p = t && partsOf(t)[tm.partIdx];
+  if (tm.elapsed >= 10) store.put(uid("s"), {kind:"session", taskId:tm.taskId, partKey: p ? p.key : null, stepText: p ? p.text : "", seconds: tm.elapsed, at: now()});
+  else render();
+}
+function viewTimer(){
+  const tm = state.timer, t = store.get(tm.taskId), ps = t ? partsOf(t) : [], p = ps[tm.partIdx];
+  if (tm.finished){
+    const nx = t ? nextPart(t) : -1;
+    return `<section class="timer">
+      ${p && p.done ? `<div class="flash" role="status" style="text-align:left;width:100%"><span class="pbadge p-${p.key}">+${PARTS[p.key].pts}</span><p><b>${score(t)} pontos.</b> ${esc(PARTS[p.key].win)}</p></div>`
+        : `<span class="badge badge-lilac">Você começou</span><p class="display">${tm.early ? "Começar já conta." : "Tempo! O mais difícil era começar."}</p>`}
+      ${p && p.done && p.key === "faisca" ? `<p class="small"><b>\u2726 A Brasinha comeu essa faísca.</b> Volte pro início pra ver ela.</p>` : ""}
+      <p class="muted">${Math.max(1,Math.round(tm.elapsed/60))} min em “${esc(t ? t.title : "")}”.</p>
+      ${p && !p.done ? `<button class="btn btn-done btn-lg" data-act="timer-part-done">${ICON_CHECK} Terminei a ${esc(PARTS[p.key].name)} (+${PARTS[p.key].pts})</button><p class="hint">Não terminou? Tudo bem. O tempo que você passou nela já foi pro histórico.</p>` : ""}
+      <div class="row" style="justify-content:center">
+        ${p && p.done && nx >= 0 ? `<button class="btn btn-primary" data-act="timer-again">${esc(PARTS[ps[nx].key].name)} · 5 min</button>` : p && !p.done ? `<button class="btn btn-ghost" data-act="timer-again">Mais 5 min</button>` : ""}
+        <button class="btn btn-ghost" data-act="timer-close">Parar por aqui</button>
+      </div></section>`;
+  }
+  return `<section class="timer" aria-live="polite">
+    <div class="row" style="justify-content:center">${p ? pbadge(p.key,true) : ""}<span class="label">${esc(t ? t.title : "")}</span></div>
+    <p class="display">${esc(p ? p.text : "Só começar")}</p>
+    <div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a3d4ec"/><stop offset=".5" stop-color="#7fa6d6"/><stop offset="1" stop-color="#8f86d9"/></linearGradient></defs><circle class="track" cx="60" cy="60" r="52"/><circle class="bar" id="ring-bar" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="0"/></svg><div class="time" id="ring-time" role="timer">--:--</div></div>
+    <div class="row" style="justify-content:center"><button class="btn btn-ghost" data-act="timer-pause">${tm.running?"Pausar":"Continuar"}</button><button class="btn btn-quiet" data-act="timer-stop">Parar agora</button></div>
+    <p class="hint">${p ? esc(PARTS[p.key].concept[0]) + ": " + esc(PARTS[p.key].concept[1]) : ""}</p></section>`;
+}
+
+/* ---------- histórico ---------- */
+function viewHistory(){
+  const sessions = store.all("session"), week = now() - 7*864e5;
+  const doneParts = []; store.all("task").forEach(t => partsOf(t).forEach(p => { if (p.done && p.doneAt) doneParts.push({type:"p", at:p.doneAt, key:p.key, text:p.text, taskId:t.id, total: score(t)}); }));
+  const pts = doneParts.filter(d => d.at > week).reduce((a,d) => a + PARTS[d.key].pts, 0);
+  const sw = sessions.filter(s => s.at > week);
+  const outZero = store.all("task").filter(t => score(t) >= 45).length;
+  const entries = [...doneParts, ...sessions.map(s=>({...s,type:"s"}))].sort((a,b)=>b.at-a.at);
+  const days = {}; entries.forEach(e => { const k = new Date(e.at).toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"}); (days[k] = days[k] || []).push(e); });
+  const title = id => { const t = store.get(id); return t ? t.title : "tarefa apagada"; };
+  const row = e => e.type === "p" ? `<div class="entry"><span class="pbadge p-${e.key}" style="flex:none">+${PARTS[e.key].pts}</span><div><p><b>${esc(PARTS[e.key].name)}</b> ${esc(e.text)}</p><p class="small muted">${esc(title(e.taskId))}</p></div></div>`
+    : `<div class="entry"><span class="ic s">${ICON_PLAY}</span><div><p><b>Timer</b> ${esc(e.stepText||"")}</p><p class="small muted">${Math.max(1,Math.round((e.seconds||0)/60))} min · ${esc(title(e.taskId))}</p></div></div>`;
+  const list = Object.keys(days).length ? Object.entries(days).map(([k,es]) => `<div class="day"><span class="label">${esc(k)}</span><div class="card" style="gap:0">${es.map(row).join("")}</div></div>`).join("")
+    : `<div class="card"><p class="muted">Seu histórico aparece aqui depois da primeira parte feita ou do primeiro timer.</p></div>`;
+  return `<h1><em>Histórico</em></h1>
+  <p class="muted">Aqui só entra o que você fez. Dias sem registro não contam contra você.</p>
+  <div class="stats">
+    <div class="stat"><span class="label">Pontos · 7 dias</span><b>${pts}</b></div>
+    <div class="stat"><span class="label">Saíram do zero</span><b>${outZero}</b><span class="small muted">tarefas com 45+</span></div>
+    <div class="stat"><span class="label">Timers · 7 dias</span><b>${sw.length}</b></div>
+  </div>
+  ${list}`;
+}
+
+/* ---------- edições ---------- */
+function editTask(id, fn){ const t = store.get(id); if (!t) return; const b = clone(t); delete b.id; b.parts = clone(partsOf(t)); delete b.steps; fn(b); store.put(id, b); }
+function markPart(id, i, on){
+  let key = null; const before = petState();
+  editTask(id, b => { const p = b.parts[i]; p.done = on; p.doneAt = on ? now() : null; if (on) key = p.key; });
+  if (key === "faisca") petEat(before);
+  if (key){ state.flash = {key}; render(); }
+}
+
+
+/* ---------- início: convite + orbe viva ---------- */
+const ICONS = {
+  faisca:'<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="currentColor" stroke="#15111a" stroke-width="2" stroke-linejoin="round" d="M24 3c1.8 12.6 5.4 16.2 18 18-12.6 1.8-16.2 5.4-18 18-1.8-12.6-5.4-16.2-18-18 12.6-1.8 16.2-5.4 18-18z"/></svg>',
+  chao:'<svg viewBox="0 0 48 48" aria-hidden="true" shape-rendering="crispEdges"><rect x="6" y="6" width="36" height="36" rx="3" fill="#fff" stroke="#15111a" stroke-width="2.5"/><path fill="#15111a" d="M8 8h11v11H8zM30 8h10v11H30zM19 19h11v11H19zM8 30h11v10H8zM30 30h10v10H30z"/></svg>',
+  coracao:'<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#fff" stroke="#15111a" stroke-width="2.5" stroke-linejoin="round" d="M24 41C10 31 5 24 5 17c0-6 5-10 10-10 4 0 7 2 9 5 2-3 5-5 9-5 5 0 10 4 10 10 0 7-5 14-19 24z"/></svg>',
+  brilho:'<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#d6ef7e" stroke="#15111a" stroke-width="2.5" stroke-linejoin="round" d="M24 4l5.6 12.4L43 18l-10 9.2 2.8 13.4L24 34l-11.8 6.6L15 27.2 5 18l13.4-1.6z"/></svg>',
+  dragao:'<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#ff8fd0" stroke="#ffb3de" stroke-width="2" stroke-linejoin="round" d="M24 45c-9 0-15-6-15-14 0-7 5-11 8-17 1 4 3 6 5 7 0-6 3-12 9-16-1 6 2 10 5 14 2 3 3 6 3 10 0 9-6 16-15 16z"/></svg>'
+};
+const SPARK = '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="currentColor" d="M24 3c1.8 12.6 5.4 16.2 18 18-12.6 1.8-16.2 5.4-18 18-1.8-12.6-5.4-16.2-18-18 12.6-1.8 16.2-5.4 18-18z"/></svg>';
+/* ---------- Brasinha: mascote que come faíscas ---------- */
+const STAGES = [
+  {min:1,  name:"Faísca"},
+  {min:3,  name:"Chaminha"},
+  {min:6,  name:"Brasa"},
+  {min:10, name:"Fogueira"},
+  {min:15, name:"Fênix"}
+];
+const XP_PER_FEED = 10;
+function petState(){
+  let feeds = 0, pts = 0, lastPart = 0, lastFed = 0, fedToday = false;
+  const since = new Date(); since.setHours(0,0,0,0);
+  store.all("task").forEach(t => partsOf(t).forEach(p => { if (p.done){ pts += PARTS[p.key].pts; if (p.doneAt > lastPart) lastPart = p.doneAt;
+    if (p.key === "faisca"){ feeds++; if (p.doneAt > lastFed) lastFed = p.doneAt; if (p.doneAt >= since.getTime()) fedToday = true; } } }));
+  const xp = pts + feeds * XP_PER_FEED;
+  const level = Math.floor(xp / 100) + 1;
+  let stage = 0; STAGES.forEach((s,i) => { if (level >= s.min) stage = i; });
+  const last = Math.max(lastFed, lastPart);
+  let mood = "normal";
+  if (!last || now() - last > 48*3600e3) mood = "sleepy"; else if (now() - last < 6*3600e3) mood = "happy";
+  return {feeds, xp, level, stage, mood, fedToday, lo:(level-1)*100, hi:level*100};
+}
+function flame(cx, by, w, h){
+  const t = by - h, r = w/2;
+  return `M${cx},${t} C${cx+w*.18},${by-h*.72} ${cx+r},${by-h*.56} ${cx+r},${by-h*.32} C${cx+r},${by-h*.1} ${cx+w*.28},${by} ${cx},${by} C${cx-w*.28},${by} ${cx-r},${by-h*.1} ${cx-r},${by-h*.32} C${cx-r},${by-h*.56} ${cx-w*.18},${by-h*.72} ${cx},${t}Z`;
+}
+function face(mood, cx, cy, s){
+  const ex = 15*s, k = 'stroke="#15111a" stroke-width="3.5" stroke-linecap="round" fill="none"';
+  let eyes, mouth;
+  if (mood === "sleepy"){ eyes = `<path ${k} d="M${cx-ex-6*s},${cy} h${12*s} M${cx+ex-6*s},${cy} h${12*s}"/>`; mouth = `<path ${k} d="M${cx-5*s},${cy+15*s} q${5*s},${3*s} ${10*s},0"/>`; }
+  else if (mood === "happy"){ eyes = `<path ${k} d="M${cx-ex-6*s},${cy+3*s} q${6*s},-${9*s} ${12*s},0 M${cx+ex-6*s},${cy+3*s} q${6*s},-${9*s} ${12*s},0"/>`; mouth = `<path fill="#15111a" d="M${cx-8*s},${cy+11*s} h${16*s} q0,${10*s} -${8*s},${10*s} q-${8*s},0 -${8*s},-${10*s}z"/>`; }
+  else if (mood === "eating"){ eyes = `<path ${k} d="M${cx-ex-6*s},${cy+3*s} q${6*s},-${9*s} ${12*s},0 M${cx+ex-6*s},${cy+3*s} q${6*s},-${9*s} ${12*s},0"/>`; mouth = `<ellipse cx="${cx}" cy="${cy+17*s}" rx="${8*s}" ry="${9*s}" fill="#15111a"/>`; }
+  else { eyes = `<circle cx="${cx-ex}" cy="${cy}" r="${5.5*s}" fill="#15111a"/><circle cx="${cx+ex}" cy="${cy}" r="${5.5*s}" fill="#15111a"/><circle cx="${cx-ex+2*s}" cy="${cy-2*s}" r="${1.6*s}" fill="#fff"/><circle cx="${cx+ex+2*s}" cy="${cy-2*s}" r="${1.6*s}" fill="#fff"/>`; mouth = `<path ${k} d="M${cx-7*s},${cy+12*s} q${7*s},${8*s} ${14*s},0"/>`; }
+  const blush = `<ellipse cx="${cx-ex-9*s}" cy="${cy+11*s}" rx="${6*s}" ry="${3.5*s}" fill="#ffc9e8"/><ellipse cx="${cx+ex+9*s}" cy="${cy+11*s}" rx="${6*s}" ry="${3.5*s}" fill="#ffc9e8"/>`;
+  const zz = mood === "sleepy" ? `<text x="${cx+ex+18*s}" y="${cy-18*s}" font-family="Silkscreen, monospace" font-size="${16*s}" fill="#15111a">z</text><text x="${cx+ex+30*s}" y="${cy-32*s}" font-family="Silkscreen, monospace" font-size="${12*s}" fill="#15111a">z</text>` : "";
+  return blush + eyes + mouth + zz;
+}
+function mascotSVG(stage, mood){
+  const S = 'stroke="#15111a" stroke-width="3.5" stroke-linejoin="round"';
+  const P = "#ff8fd0", L = "#d6ef7e", V = "#c9b0ff", D = "#7b52d9";
+  let g = "";
+  if (stage === 0){
+    g = `<path ${S} fill="${P}" d="${flame(100,168,74,100)}"/><path fill="#fff8f7" d="${flame(100,164,34,40)}"/>` + face(mood, 100, 136, .8);
+  } else if (stage === 1){
+    g = `<path ${S} fill="${P}" d="${flame(66,166,38,58)}"/><path ${S} fill="${P}" d="${flame(134,166,38,58)}"/>
+      <path ${S} fill="${P}" d="${flame(100,172,96,132)}"/><path fill="${L}" d="${flame(100,166,48,58)}"/>` + face(mood, 100, 126, .95);
+  } else {
+    const big = stage >= 3, r = big ? 58 : 50, cy = big ? 122 : 126;
+    const tips = big ? [[70,42],[85,58],[100,82],[115,58],[130,42]] : [[80,40],[100,66],[120,40]];
+    let hair = tips.map(([x,h]) => `<path ${S} fill="${P}" d="${flame(x, cy - r + 22, 30, h + 20)}"/>`).join("");
+    let wings = stage === 4 ? `<path ${S} fill="${V}" d="M${100-r+6},${cy} C${100-r-40},${cy-14} ${100-r-52},${cy-58} ${100-r-26},${cy-70} C${100-r-24},${cy-40} ${100-r-6},${cy-28} ${100-r+14},${cy-24}Z"/><path ${S} fill="${V}" d="M${100+r-6},${cy} C${100+r+40},${cy-14} ${100+r+52},${cy-58} ${100+r+26},${cy-70} C${100+r+24},${cy-40} ${100+r+6},${cy-28} ${100+r-14},${cy-24}Z"/>` : "";
+    const log = big ? `<rect ${S} fill="${D}" x="${100-r-4}" y="${cy+r-10}" width="${2*r+8}" height="18" rx="9"/>` : "";
+    const feet = `<ellipse ${S} fill="${D}" cx="${100-r*.42}" cy="${cy+r-2}" rx="15" ry="8"/><ellipse ${S} fill="${D}" cx="${100+r*.42}" cy="${cy+r-2}" rx="15" ry="8"/>`;
+    const arms = `<path stroke="#15111a" stroke-width="3.5" stroke-linecap="round" fill="none" d="M${100-r+4},${cy+6} q-16,-2 -20,-16 M${100+r-4},${cy+6} q16,-2 20,-16"/>`;
+    const crown = stage >= 3 ? `<path fill="#d6ef7e" stroke="#15111a" stroke-width="2.5" stroke-linejoin="round" d="M100,${cy-r-58} c1.4,8 3.6,10.2 11,11.5 c-7.4,1.3 -9.6,3.5 -11,11.5 c-1.4,-8 -3.6,-10.2 -11,-11.5 c7.4,-1.3 9.6,-3.5 11,-11.5z"/>` : "";
+    g = wings + hair + (big ? log : feet) + arms + `<circle ${S} fill="${P}" cx="100" cy="${cy}" r="${r}"/><ellipse fill="${L}" cx="100" cy="${cy+r*.38}" rx="${r*.5}" ry="${r*.34}"/>` + crown + face(mood, 100, cy - 6, big ? 1.1 : 1);
+  }
+  const star = (x,y,s) => `<path fill="#15111a" d="M${x},${y-s} c${s*.12},${s*.72} ${s*.28},${s*.88} ${s},${s} c-${s*.72},${s*.12} -${s*.88},${s*.28} -${s},${s} c-${s*.12},-${s*.72} -${s*.28},-${s*.88} -${s},-${s} c${s*.72},-${s*.12} ${s*.88},-${s*.28} ${s},-${s}z"/>`;
+  return `<svg viewBox="-10 -10 220 210" aria-hidden="true"><g class="deco">${star(22,52,16)}${star(44,80,8)}${star(176,150,15)}${star(192,122,8)}</g><g class="body">${g}</g></svg>`;
+}
+const NAV_ICONS = {
+  tarefas:'<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="5" width="22" height="22" rx="5" fill="#d6ef7e" stroke="#15111a" stroke-width="2.4"/><path d="M10 12l2.5 2.5L17 10M10 20.5l2.5 2.5L17 18.5" fill="none" stroke="#15111a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 12h3M20 20.5h3" stroke="#15111a" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  metodo:'<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 7c4-1.5 8-1.5 11 1v18c-3-2.5-7-2.5-11-1z" fill="#c9b0ff" stroke="#15111a" stroke-width="2.4" stroke-linejoin="round"/><path d="M27 7c-4-1.5-8-1.5-11 1v18c3-2.5 7-2.5 11-1z" fill="#ff8fd0" stroke="#15111a" stroke-width="2.4" stroke-linejoin="round"/></svg>',
+  historico:'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="#ffc9e8" stroke="#15111a" stroke-width="2.4"/><path d="M16 10v6.5l4 2.5" fill="none" stroke="#15111a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+function viewHome(){
+  const all = tasks(), open = all.filter(t => !t.doneAt && nextPart(t) >= 0);
+  const h = new Date().getHours();
+  const greet = h < 5 ? "boa madrugada" : h < 12 ? "bom dia" : h < 18 ? "boa tarde" : "boa noite";
+  const since = new Date(); since.setHours(0,0,0,0);
+  let today = 0; all.forEach(t => partsOf(t).forEach(p => { if (p.done && p.doneAt >= since.getTime()) today += PARTS[p.key].pts; }));
+  const best = open.slice().sort((a,b) => score(b) - score(a))[0];
+  let title, sub;
+  if (h >= 23 || h < 5){ title = "Só uma <em>faísca</em>, e depois cama."; sub = "Tarde assim, o menor gesto já conta. Amanhã a tarefa começa mais leve."; }
+  else if (!all.length){ title = "O que tá <em>pesando</em> hoje?"; sub = "A gente divide em 5 partes. A mais fácil vale mais, a que paralisa fica pro fim."; }
+  else if (today >= 45){ title = "Você já <em>saiu</em> do zero."; sub = `+${today} pontos hoje. Pode parar aqui ou acender mais uma.`; }
+  else if (today > 0){ title = "Você <em>começou</em>. Era o mais difícil."; sub = `+${today} pontos hoje. Mais uma parte e você sai do zero.`; }
+  else if (best && score(best) > 0){ title = "Tem coisa <em>pela metade</em> te esperando."; sub = "E ela tá menor do que parece. Olha só o próximo passo."; }
+  else { title = "Uma <em>faísca</em> basta."; sub = "Escolha uma tarefa. Você só precisa do primeiro gesto."; }
+  const pet = petState(), mood = state.petAnim === "eating" ? "eating" : pet.mood;
+  let say;
+  if (state.petSay && state.petSay.until > now()) say = state.petSay.text;
+  else if (pet.mood === "sleepy") say = "zzz... me acorda com uma faísca";
+  else if (pet.fedToday) say = "barriguinha cheia hoje \u2726";
+  else if (all.length) say = "com fome de faísca...";
+  else say = "oi! eu como as suas faíscas \u2726";
+  const xp = pet.xp - pet.lo;
+  let cont = "";
+  if (best){ const p = partsOf(best)[nextPart(best)]; cont = `<button class="link" data-act="start" data-task="${best.id}">ou continuar <b>${esc(PARTS[p.key].name)}</b> de “${esc(best.title)}” · ${score(best)} pts</button>`; }
+  const px = Array.from({length:10}, (_,i) => `<i class="${i < Math.round(xp/10) ? "on" : ""}"></i>`).join("");
+  return `<section class="lobby">
+    <div class="bento hero-box">
+      <span class="spark s1">${SPARK}</span><span class="spark s2">${SPARK}</span>
+      <span class="greet">${greet} ✳</span>
+      <h1 class="home-title">${title}</h1>
+      <p class="home-sub">${esc(sub)}</p>
+      <button class="btn btn-primary btn-xl" data-act="new-flow">Começar tarefa ✦</button>
+      ${cont}
+    </div>
+    <div class="bento screen-box">
+      <div class="screen">
+        <div class="scr-top"><span class="lbl">Brasinha \u00b7 ${esc(STAGES[pet.stage].name)}</span><span class="lbl">nv. ${pet.level}</span></div>
+        <div class="pet ${state.petAnim || ""} mood-${mood}">${mascotSVG(pet.stage, mood)}${state.petAnim === "eating" ? '<span class="snack" aria-hidden="true">\u2726</span>' : ""}</div>
+        <p class="scr-say" role="status">${say}</p>
+        <div class="px" aria-hidden="true">${px}</div>
+        <span class="lbl">${pet.xp - pet.lo}/100 xp \u00b7 ${pet.xp} total</span>
+      </div>
+      <div class="screen-foot"><span>hoje +${today}</span><span>\u2726 ${pet.feeds} comida${pet.feeds === 1 ? "" : "s"}</span></div>
+    </div>
+    <div class="stickers" aria-label="As 5 partes">${ORDER.map(k => `<div class="sticker p-${k}" title="${esc(PARTS[k].tag)}">${ICONS[k]}<b>${PARTS[k].pts}</b><span>${esc(PARTS[k].name)}</span></div>`).join("")}</div>
+    <div class="bento checker-box"><div class="checker" aria-hidden="true"></div><p>A mais fácil vale <em>mais</em>. A que paralisa vale só 10 e fica pro fim.</p></div>
+  </section>`;
+}
+function petEat(before){
+  const after = petState();
+  let text = `nham! comi a faísca <em>+${XP_PER_FEED} xp</em> \u2726`;
+  if (after.stage > before.stage) text = `evoluí! agora sou <em>${STAGES[after.stage].name}</em> \u2726`;
+  else if (after.level > before.level) text = `subi pro <em>nível ${after.level}</em>! \u2726`;
+  state.petQueue = text;
+}
+function consumePetQueue(){
+  if (!state.petQueue || state.tab !== "inicio" || state.timer) return;
+  state.petSay = {text: state.petQueue, until: now() + 5000}; state.petQueue = null; state.petAnim = "eating";
+  clearTimeout(consumePetQueue.t); consumePetQueue.t = setTimeout(() => { state.petAnim = null; render(); }, 1300);
+  setTimeout(() => { if (state.tab === "inicio" && !state.timer) render(); }, 5100);
+}
+
+function todaysParts(){
+  const since = new Date(); since.setHours(0,0,0,0); const out = [];
+  store.all("task").forEach(t => partsOf(t).forEach(p => { if (p.done && p.doneAt >= since.getTime()) out.push([p.doneAt, p.key]); }));
+  return out.sort((a,b) => a[0]-b[0]).slice(-10).map(x => x[1]);
+}
+const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const orb = { wrap:null, breath:null, last:null, raf:0 };
+function bindOrb(){
+  orb.wrap = $(".orb-wrap"); orb.breath = $("#breath"); orb.last = null;
+  if (!REDUCED && !orb.raf){ const loop = () => { breathTick(); orb.raf = requestAnimationFrame(loop); }; orb.raf = requestAnimationFrame(loop); }
+}
+function breathTick(){
+  const b = orb.breath; if (!b || !b.isConnected) return;
+  const inhale = Math.cos(performance.now()/1000 * Math.PI * 2 / 10) > 0;   // 10 s: 5 inspira, 5 solta, junto com a esfera
+  if (inhale !== orb.last){ orb.last = inhale; b.style.opacity = 0; setTimeout(() => { b.textContent = inhale ? "inspira" : "solta"; b.style.opacity = ""; }, 800); }
+}
+document.addEventListener("pointermove", ev => {
+  const w = orb.wrap; if (!w || !w.isConnected || REDUCED) return;
+  const r = w.getBoundingClientRect(); const dx = ev.clientX - (r.left + r.width/2), dy = ev.clientY - (r.top + r.height/2);
+  const d = Math.hypot(dx, dy) || 1, m = Math.min(1, d/700) * 16;
+  w.style.setProperty("--tx", (dx/d*m).toFixed(1) + "px"); w.style.setProperty("--ty", (dy/d*m).toFixed(1) + "px");
+});
+/* ---------- eventos ---------- */
+document.addEventListener("click", e => {
+  const go = e.target.closest("[data-go]");
+  if (go){ if (state.timer && !state.timer.finished) finishTimer(true); state.timer = null; state.flash = null; state.tab = go.dataset.go; render(); window.scrollTo(0,0); return; }
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act, tid = b.dataset.task, f = state.flow;
+  switch(act){
+    case "dismiss-error": state.error = null; render(); break;
+    case "dismiss-flash": state.flash = null; render(); break;
+    case "new-flow": startFlow(null); render(); window.scrollTo(0,0); { const i = $("#f-title"); if (i) i.focus(); } break;
+    case "adopt-example": { const body = clone(EXAMPLE); delete body.id; delete body.example; body.createdAt = now(); body.parts[0].doneAt = now(); store.put(uid("t"), body); break; }
+    case "toggle-part": { const t = store.get(tid); markPart(tid, +b.dataset.i, !partsOf(t)[+b.dataset.i].done); break; }
+    case "start": startTimer(tid, 5); break;
+    case "edit": startFlow(tid, true); render(); break;
+    case "finish": editTask(tid, t => { t.doneAt = now(); t.stuck = false; }); state.flash = null; break;
+    case "reopen": editTask(tid, t => { t.doneAt = null; }); break;
+    case "ask-del": state.confirmDel = tid; render(); break;
+    case "cancel-del": state.confirmDel = null; render(); break;
+    case "del": state.confirmDel = null; store.del(tid); break;
+    case "cancel-flow": state.flow = null; state.tab = "inicio"; render(); break;
+    case "flow-next": {
+      if (f.step === 1 && !f.title.trim()) break;
+      if (f.step >= 2 && f.step < FLOW_STEPS.length && !f.parts[FILL[f.step-2]].trim()) break;
+      f.step++; render(); window.scrollTo(0,0); const inp = $("#f-part") || $("#f-title"); if (inp) inp.focus(); break; }
+    case "flow-back": if (f.step === 2 && f.taskId){ state.flow = null; state.tab = "tarefas"; } else f.step--; render(); break;
+    case "part-example": f.parts[b.dataset.key] = b.dataset.val; render(); break;
+    case "flow-min": f.minutes = +b.dataset.val; render(); break;
+    case "flow-save": commitFlow(); state.tab = "tarefas"; render(); break;
+    case "flow-go": { const m = f.minutes; const r = commitFlow(); startTimer(r.id, m); break; }
+    case "timer-pause": { const tm = state.timer; if (tm.running){ tm.remaining = Math.max(0,(tm.endAt-now())/1000); tm.running = false; } else { tm.endAt = now()+tm.remaining*1000; tm.running = true; } b.textContent = tm.running ? "Pausar" : "Continuar"; tick(); break; }
+    case "timer-stop": finishTimer(true); break;
+    case "timer-part-done": { const tm = state.timer, before = petState(); let k = null; editTask(tm.taskId, t => { const p = t.parts[tm.partIdx]; if (p){ p.done = true; p.doneAt = now(); k = p.key; } }); if (k === "faisca") petEat(before); break; }
+    case "timer-again": startTimer(state.timer.taskId, 5); break;
+    case "timer-close": { state.timer = null; state.tab = "inicio"; render(); break; }
+  }
+});
+document.addEventListener("input", e => {
+  const el = e.target, kind = el.dataset.input; if (!kind) return;
+  const next = document.querySelector('[data-act="flow-next"]');
+  if (kind === "flow"){
+    const k = el.dataset.key; state.flow[k] = el.value;
+    if (k === "title" && next) next.disabled = !el.value.trim();
+  } else if (kind === "part"){
+    const k = el.dataset.key; state.flow.parts[k] = el.value;
+    if (next) next.disabled = !el.value.trim();
+    const w = $("#decision-warn"); if (w) w.hidden = !(k === "faisca" && el.value.trim() && DECISION.test(el.value));
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter" || e.target.tagName !== "INPUT" || e.target.type !== "text") return;
+  e.preventDefault(); const b = document.querySelector('[data-act="flow-next"]'); if (b && !b.disabled) b.click();
+});
+
+setStatus(); render(); store.init();
+})();
+</script>
+
+</body>
+</html>
