@@ -2,7 +2,7 @@
 
 Um sistema baseado em estudos de TCC e DBT para lidar com a paralisia na hora de executar tarefas que travam.
 
-![Tela inicial](docs/preview.png)
+![Tela inicial](sistemaprocrastinacao/docs/preview.png)
 
 ## O método das 5 partes
 
